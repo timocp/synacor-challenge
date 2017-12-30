@@ -9,16 +9,14 @@ func (vm *machine) run() {
 }
 
 func (vm *machine) exec() {
-	op := vm.mem[vm.pc]
-	vm.pc++
+	op := vm.read()
 	switch op {
 	case 0: // halt
 		vm.halted = true
 	case 6: // jmp
 		vm.pc = vm.mem[vm.pc]
 	case 19: // out
-		fmt.Print(string(rune(vm.mem[vm.pc])))
-		vm.pc++
+		fmt.Print(string(rune(vm.read())))
 	case 21: // noop
 	default:
 		panic(fmt.Errorf("unimplemented opcode: %d at %x", op, vm.pc))

@@ -33,3 +33,11 @@ func (vm *machine) load(input io.Reader) error {
 		vm.mem[i] = uint16(buf[0]) + (uint16(buf[1]) << 8)
 	}
 }
+
+// read returns the value pointed to by the program counter and increments
+// the pc
+func (vm *machine) read() uint16 {
+	r := vm.mem[vm.pc]
+	vm.pc++
+	return r
+}
