@@ -16,13 +16,14 @@ import (
 */
 
 func (vm *machine) load(input io.Reader) error {
-	fmt.Printf("Loading ... ")
 	buf := make([]byte, 2)
 	for i := 0; ; i++ {
 		n, err := input.Read(buf)
 		if err != nil {
 			if err == io.EOF {
-				fmt.Printf("%d pairs read\n", i)
+				if vm.debug {
+					fmt.Printf("%d pairs read\n", i)
+				}
 				return nil
 			}
 			return err
@@ -40,4 +41,34 @@ func (vm *machine) read() uint16 {
 	r := vm.mem[vm.pc]
 	vm.pc++
 	return r
+}
+
+// readValue reads the next address and interprets it as a literal or register
+// read.
+func (vm *machine) readValue() uint16 {
+	v := vm.read()
+	if v <= 32767 {
+		return v
+	}
+	if v <= 32775 {
+		return vm.reg[v-32768]
+	}
+	panic(fmt.Errorf("invalid memory: %d at %x", v, vm.pc-1))
+}
+
+// setValue sets a register or a memory address a to a specific value n
+func (vm *machine) setValue(a, n uint16) {
+	if a <= 32767 {
+		if vm.debug {
+			fmt.Printf(" setValue: memory location %x being set to %d\n", a, n)
+		}
+		vm.mem[a] = n
+	} else if a <= 32775 {
+		if vm.debug {
+			fmt.Printf(" setValue: register %d being set to %d\n", a-32768, n)
+		}
+		vm.reg[a-32768] = n
+	} else {
+		panic(fmt.Errorf("invalid memory: %d", a))
+	}
 }

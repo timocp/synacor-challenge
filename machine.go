@@ -20,4 +20,5 @@ type machine struct {
 
 	// flags
 	halted bool
+	debug  bool
 }
