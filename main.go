@@ -11,7 +11,7 @@ func main() {
 		log.Fatal(err)
 	}
 	defer file.Close()
-	vm := new(machine)
+	vm := newMachine()
 	vm.load(file)
 	vm.debug = true
 	vm.run()

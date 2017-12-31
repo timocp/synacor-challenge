@@ -20,6 +20,14 @@ func (vm *machine) exec() {
 		a := vm.read()
 		b := vm.readValue()
 		vm.setValue(a, b)
+	case 2: // push a
+		vm.stack.push(vm.readValue())
+	case 3: // pop a
+		v, ok := vm.stack.pop()
+		if !ok {
+			panic(fmt.Errorf("pop from empty stack"))
+		}
+		vm.setValue(vm.read(), v)
 	case 4: // eq a b c
 		a := vm.read()
 		b := vm.readValue()

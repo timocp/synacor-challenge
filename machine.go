@@ -13,7 +13,7 @@ package main
 type machine struct {
 	mem   [32768]uint16
 	reg   [8]uint16
-	stack []uint16
+	stack *stack
 
 	// program counter
 	pc uint16
@@ -21,4 +21,10 @@ type machine struct {
 	// flags
 	halted bool
 	debug  bool
+}
+
+func newMachine() *machine {
+	vm := new(machine)
+	vm.stack = newStack()
+	return vm
 }
