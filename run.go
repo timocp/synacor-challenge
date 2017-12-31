@@ -91,7 +91,11 @@ func (vm *machine) exec() {
 		vm.setValue(a, (^b)%32768)
 	case 15: // rmem a b
 		a := vm.read()
-		b := vm.readAt(vm.readValue())
+		b := vm.readAt()
+		vm.setValue(a, b)
+	case 16: // wmem a b
+		a := vm.readValue()
+		b := vm.readValue()
 		vm.setValue(a, b)
 	case 17: // call a
 		a := vm.readValue()

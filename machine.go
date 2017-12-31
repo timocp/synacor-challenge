@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 /*
 == architecture ==
 - three storage regions
@@ -35,4 +37,17 @@ func (vm *machine) push(v uint16) {
 
 func (vm *machine) pop() (uint16, bool) {
 	return vm.stack.pop()
+}
+
+func (vm *machine) dumpMem() {
+	for i := 0; i < 32768; i++ {
+		v := vm.mem[i]
+		if v <= 32767 {
+			fmt.Printf("%04x %4x\n", i, v)
+		} else if v <= 32775 {
+			fmt.Printf("%04x r%d\n", i, v-32768)
+		} else {
+			panic(fmt.Errorf("invalid value in memory: %x at %04x", v, i))
+		}
+	}
 }

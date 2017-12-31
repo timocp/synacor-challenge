@@ -70,12 +70,13 @@ func (vm *machine) setValue(a, n uint16) {
 	}
 }
 
-// readAt reads from memory or register referenced by a
-func (vm *machine) readAt(a uint16) uint16 {
-	if a <= 32767 {
-		return vm.mem[a]
-	} else if a <= 32775 {
-		return vm.reg[a-32768]
+// readAt reads from memory pointed to by current program counter
+func (vm *machine) readAt() uint16 {
+	v := vm.read()
+	if v <= 32767 {
+		return vm.mem[v]
+	} else if v <= 32775 {
+		return vm.mem[vm.reg[v-32768]]
 	}
-	panic(fmt.Errorf("invalid memory: %x", a))
+	panic(fmt.Errorf("invalid memory: %x", v))
 }
