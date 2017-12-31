@@ -65,6 +65,16 @@ func (vm *machine) exec() {
 		b := vm.readValue()
 		c := vm.readValue()
 		vm.setValue(a, (b+c)%32768)
+	case 10: // mult a b c
+		a := vm.read()
+		b := vm.readValue()
+		c := vm.readValue()
+		vm.setValue(a, (b*c)%32768)
+	case 11: // mod 1 b c
+		a := vm.read()
+		b := vm.readValue()
+		c := vm.readValue()
+		vm.setValue(a, (b%c)%32768)
 	case 12: // and a b c
 		a := vm.read()
 		b := vm.readValue()
