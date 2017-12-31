@@ -37,6 +37,15 @@ func (vm *machine) exec() {
 		} else {
 			vm.setValue(a, 0)
 		}
+	case 5: // gt a b c
+		a := vm.read()
+		b := vm.readValue()
+		c := vm.readValue()
+		if b > c {
+			vm.setValue(a, 1)
+		} else {
+			vm.setValue(a, 0)
+		}
 	case 6: // jmp a
 		vm.pc = vm.mem[vm.pc]
 	case 7: // jt a b
