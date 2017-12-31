@@ -89,6 +89,10 @@ func (vm *machine) exec() {
 		a := vm.read()
 		b := vm.readValue()
 		vm.setValue(a, (^b)%32768)
+	case 15: // rmem a b
+		a := vm.read()
+		b := vm.readAt(vm.readValue())
+		vm.setValue(a, b)
 	case 17: // call a
 		a := vm.readValue()
 		vm.push(vm.pc)
@@ -97,7 +101,7 @@ func (vm *machine) exec() {
 		fmt.Print(string(rune(vm.read())))
 	case 21: // noop
 	default:
-		panic(fmt.Errorf("unimplemented opcode: %d at %x", op, vm.pc-1))
+		panic(fmt.Errorf("unimplemented opcode: %d at %d", op, vm.pc-1))
 	}
 }
 
@@ -136,17 +140,28 @@ func (vm *machine) traceOp() {
 		return // ignore OUT
 	}
 	fmt.Printf("%04x %-4s", vm.pc, ops[op].name)
-	for i := uint16(0); i < ops[op].args; i++ {
-		m := vm.mem[vm.pc+i+1]
-		if m <= 32767 {
-			// memory address or literal
-			fmt.Printf(" %4x(%d)", m, vm.mem[m])
-		} else if m <= 32775 {
-			// register reference
-			fmt.Printf(" r%d(%d)", m-32768, vm.reg[m-32768])
+	for i := uint16(0); i <= 3; i++ {
+		if i < ops[op].args {
+			m := vm.mem[vm.pc+i+1]
+			if m <= 32767 {
+				// memory address or literal
+				fmt.Printf(" %4x", m)
+			} else if m <= 32775 {
+				// register reference
+				fmt.Printf("   r%d", m-32768)
+			} else {
+				panic(fmt.Errorf("invalid memory: %d at %d", m, vm.pc+i+1))
+			}
 		} else {
-			panic(fmt.Errorf("invalid memory: %d at %x", m, vm.pc+i+1))
+			fmt.Printf("     ")
 		}
 	}
-	fmt.Printf("\n")
+	fmt.Printf(" r=[")
+	for i, r := range vm.reg {
+		if i > 0 {
+			fmt.Printf(" ")
+		}
+		fmt.Printf("%4x", r)
+	}
+	fmt.Printf("] s=%s\n", vm.stack)
 }

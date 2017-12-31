@@ -35,7 +35,7 @@ func (s *stack) String() string {
 		if i > 0 {
 			str += " "
 		}
-		str += fmt.Sprintf("%d", s.vals[i])
+		str += fmt.Sprintf("%x", s.vals[i])
 	}
 	str += "]"
 	return str

@@ -53,25 +53,29 @@ func (vm *machine) readValue() uint16 {
 	if v <= 32775 {
 		return vm.reg[v-32768]
 	}
-	panic(fmt.Errorf("invalid memory: %d at %x", v, vm.pc-1))
+	panic(fmt.Errorf("invalid memory: %x at %x", v, vm.pc-1))
 }
 
 // setValue sets a register or a memory address a to a specific value n
 func (vm *machine) setValue(a, n uint16) {
 	if n > 32775 {
-		panic(fmt.Errorf("invalid value to store in memory: %d", n))
+		panic(fmt.Errorf("invalid value to store in memory: %x", n))
 	}
 	if a <= 32767 {
-		if vm.debug {
-			fmt.Printf(" setValue: memory location %x being set to %d\n", a, n)
-		}
 		vm.mem[a] = n
 	} else if a <= 32775 {
-		if vm.debug {
-			fmt.Printf(" setValue: register %d being set to %d\n", a-32768, n)
-		}
 		vm.reg[a-32768] = n
 	} else {
-		panic(fmt.Errorf("invalid memory: %d", a))
+		panic(fmt.Errorf("invalid memory: %x", a))
 	}
+}
+
+// readAt reads from memory or register referenced by a
+func (vm *machine) readAt(a uint16) uint16 {
+	if a <= 32767 {
+		return vm.mem[a]
+	} else if a <= 32775 {
+		return vm.reg[a-32768]
+	}
+	panic(fmt.Errorf("invalid memory: %x", a))
 }
