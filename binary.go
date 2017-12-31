@@ -58,6 +58,9 @@ func (vm *machine) readValue() uint16 {
 
 // setValue sets a register or a memory address a to a specific value n
 func (vm *machine) setValue(a, n uint16) {
+	if n > 32775 {
+		panic(fmt.Errorf("invalid value to store in memory: %d", n))
+	}
 	if a <= 32767 {
 		if vm.debug {
 			fmt.Printf(" setValue: memory location %x being set to %d\n", a, n)

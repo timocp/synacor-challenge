@@ -65,6 +65,20 @@ func (vm *machine) exec() {
 		b := vm.readValue()
 		c := vm.readValue()
 		vm.setValue(a, (b+c)%32768)
+	case 12: // and a b c
+		a := vm.read()
+		b := vm.readValue()
+		c := vm.readValue()
+		vm.setValue(a, b&c)
+	case 13: // or a b c
+		a := vm.read()
+		b := vm.readValue()
+		c := vm.readValue()
+		vm.setValue(a, b|c)
+	case 14: // not a b
+		a := vm.read()
+		b := vm.readValue()
+		vm.setValue(a, (^b)%32768)
 	case 19: // out a
 		fmt.Print(string(rune(vm.read())))
 	case 21: // noop
