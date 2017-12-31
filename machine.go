@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 /*
 == architecture ==
 - three storage regions
@@ -27,4 +29,19 @@ func newMachine() *machine {
 	vm := new(machine)
 	vm.stack = newStack()
 	return vm
+}
+
+func (vm *machine) push(v uint16) {
+	vm.stack.push(v)
+	if vm.debug {
+		fmt.Printf(" stack=%s\n", vm.stack)
+	}
+}
+
+func (vm *machine) pop() (uint16, bool) {
+	v, ok := vm.stack.pop()
+	if vm.debug {
+		fmt.Printf(" stack=%s\n", vm.stack)
+	}
+	return v, ok
 }

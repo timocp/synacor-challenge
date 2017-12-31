@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 type stack struct {
 	vals []uint16
 	sp   int
@@ -11,10 +13,10 @@ func newStack() *stack {
 
 func (s *stack) push(v uint16) {
 	s.sp++
-	if s.sp < len(s.vals)+1 {
-		s.vals = append(s.vals, v)
-	} else {
+	if s.sp <= len(s.vals)-1 {
 		s.vals[s.sp] = v
+	} else {
+		s.vals = append(s.vals, v)
 	}
 }
 
@@ -25,4 +27,16 @@ func (s *stack) pop() (uint16, bool) {
 	v := s.vals[s.sp]
 	s.sp--
 	return v, true
+}
+
+func (s *stack) String() string {
+	str := "["
+	for i := 0; i <= s.sp; i++ {
+		if i > 0 {
+			str += " "
+		}
+		str += fmt.Sprintf("%d", s.vals[i])
+	}
+	str += "]"
+	return str
 }

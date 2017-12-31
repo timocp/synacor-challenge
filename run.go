@@ -21,9 +21,9 @@ func (vm *machine) exec() {
 		b := vm.readValue()
 		vm.setValue(a, b)
 	case 2: // push a
-		vm.stack.push(vm.readValue())
+		vm.push(vm.readValue())
 	case 3: // pop a
-		v, ok := vm.stack.pop()
+		v, ok := vm.pop()
 		if !ok {
 			panic(fmt.Errorf("pop from empty stack"))
 		}
@@ -79,6 +79,10 @@ func (vm *machine) exec() {
 		a := vm.read()
 		b := vm.readValue()
 		vm.setValue(a, (^b)%32768)
+	case 17: // call a
+		a := vm.readValue()
+		vm.push(vm.pc)
+		vm.pc = a
 	case 19: // out a
 		fmt.Print(string(rune(vm.read())))
 	case 21: // noop
@@ -125,7 +129,7 @@ func (vm *machine) traceOp() {
 	for i := uint16(0); i < ops[op].args; i++ {
 		m := vm.mem[vm.pc+i+1]
 		if m <= 32767 {
-			// memory address
+			// memory address or literal
 			fmt.Printf(" %4x(%d)", m, vm.mem[m])
 		} else if m <= 32775 {
 			// register reference
