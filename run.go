@@ -101,6 +101,14 @@ func (vm *machine) exec() {
 		a := vm.readValue()
 		vm.push(vm.pc)
 		vm.pc = a
+	case 18: // ret
+		a, ok := vm.pop()
+		if ok {
+			vm.pc = a
+		} else {
+			// halt if empty stack
+			vm.halted = true
+		}
 	case 19: // out a
 		fmt.Print(string(rune(vm.read())))
 	case 21: // noop

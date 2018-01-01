@@ -13,6 +13,6 @@ func main() {
 	defer file.Close()
 	vm := newMachine()
 	vm.load(file)
-	vm.debug = true
+	vm.debug = false
 	vm.run()
 }
