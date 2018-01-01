@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 /*
 == architecture ==
@@ -23,6 +26,7 @@ type machine struct {
 	// flags
 	halted bool
 	debug  bool
+	trace  *os.File
 }
 
 func newMachine() *machine {

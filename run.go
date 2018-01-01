@@ -1,8 +1,19 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 func (vm *machine) run() {
+	if vm.debug {
+		var err error
+		vm.trace, err = os.OpenFile("trace.txt", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
+		if err != nil {
+			panic(err)
+		}
+		defer vm.trace.Close()
+	}
 	for !vm.halted {
 		vm.exec()
 	}
@@ -148,32 +159,29 @@ var ops = []struct {
 
 func (vm *machine) traceOp() {
 	op := vm.mem[vm.pc]
-	if op == 19 {
-		return // ignore OUT
-	}
-	fmt.Printf("%04x %-4s", vm.pc, ops[op].name)
+	fmt.Fprintf(vm.trace, "%04x %-4s", vm.pc, ops[op].name)
 	for i := uint16(0); i <= 3; i++ {
 		if i < ops[op].args {
 			m := vm.mem[vm.pc+i+1]
 			if m <= 32767 {
 				// memory address or literal
-				fmt.Printf(" %4x", m)
+				fmt.Fprintf(vm.trace, " %4x", m)
 			} else if m <= 32775 {
 				// register reference
-				fmt.Printf("   r%d", m-32768)
+				fmt.Fprintf(vm.trace, "   r%d", m-32768)
 			} else {
 				panic(fmt.Errorf("invalid memory: %d at %d", m, vm.pc+i+1))
 			}
 		} else {
-			fmt.Printf("     ")
+			fmt.Fprintf(vm.trace, "     ")
 		}
 	}
-	fmt.Printf(" r=[")
+	fmt.Fprintf(vm.trace, " r=[")
 	for i, r := range vm.reg {
 		if i > 0 {
-			fmt.Printf(" ")
+			fmt.Fprintf(vm.trace, " ")
 		}
-		fmt.Printf("%4x", r)
+		fmt.Fprintf(vm.trace, "%4x", r)
 	}
-	fmt.Printf("] s=%s\n", vm.stack)
+	fmt.Fprintf(vm.trace, "] s=%s\n", vm.stack)
 }
