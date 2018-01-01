@@ -110,7 +110,7 @@ func (vm *machine) exec() {
 			vm.halted = true
 		}
 	case 19: // out a
-		fmt.Print(string(rune(vm.read())))
+		fmt.Print(string(rune(vm.readValue())))
 	case 21: // noop
 	default:
 		panic(fmt.Errorf("unimplemented opcode: %d at %d", op, vm.pc-1))
