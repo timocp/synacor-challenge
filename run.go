@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 )
 
@@ -20,6 +21,7 @@ func (vm *machine) run() {
 }
 
 func (vm *machine) exec() {
+	buf := make([]byte, 1)
 	if vm.debug {
 		vm.traceOp()
 	}
@@ -122,6 +124,17 @@ func (vm *machine) exec() {
 		}
 	case 19: // out a
 		fmt.Print(string(rune(vm.readValue())))
+	case 20: // in a
+		a := vm.read()
+		n, err := os.Stdin.Read(buf)
+		if n > 0 {
+			vm.setValue(a, uint16(buf[0]))
+		}
+		if err == io.EOF {
+			vm.halted = true
+		} else if err != nil {
+			panic(err)
+		}
 	case 21: // noop
 	default:
 		panic(fmt.Errorf("unimplemented opcode: %d at %d", op, vm.pc-1))
