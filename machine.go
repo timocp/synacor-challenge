@@ -24,9 +24,10 @@ type machine struct {
 	pc uint16
 
 	// flags
-	halted bool
-	debug  bool
-	trace  *os.File
+	halted     bool
+	debug      bool
+	breakpoint uint16
+	trace      *os.File
 }
 
 func newMachine() *machine {

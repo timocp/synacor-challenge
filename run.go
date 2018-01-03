@@ -7,7 +7,7 @@ import (
 )
 
 func (vm *machine) run() {
-	if vm.debug {
+	if vm.debug || vm.breakpoint > 0 {
 		var err error
 		vm.trace, err = os.OpenFile("trace.txt", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
 		if err != nil {
@@ -22,6 +22,16 @@ func (vm *machine) run() {
 
 func (vm *machine) exec() {
 	buf := make([]byte, 1)
+	if vm.breakpoint > 0 && vm.pc == vm.breakpoint {
+		vm.debug = true
+		// hack register 7
+		vm.reg[7] = 6
+		// bypass the confirmation mechanism
+		// replace CALL 178b with:
+		// JMP 157a  (178b returns with r0 != 6)
+		vm.mem[0x1571] = 6
+		vm.mem[0x1572] = 0x0157a
+	}
 	if vm.debug {
 		vm.traceOp()
 	}
@@ -146,28 +156,28 @@ var ops = []struct {
 	name string
 	args uint16
 }{
-	{"HALT", 0},
-	{"SET", 2},
-	{"PUSH", 1},
-	{"POP", 1},
-	{"EQ", 3},
-	{"GT", 3},
-	{"JMP", 1},
-	{"JT", 2},
-	{"JF", 2},
-	{"ADD", 3},
-	{"MULT", 3},
-	{"MOD", 3},
-	{"AND", 3},
-	{"OR", 3},
-	{"NOT", 2},
-	{"RMEM", 2},
-	{"WMEM", 2},
-	{"CALL", 1},
-	{"RET", 0},
-	{"OUT", 1},
-	{"IN", 1},
-	{"NOOP", 0},
+	{"HALT", 0}, //  0
+	{"SET", 2},  //  1
+	{"PUSH", 1}, //  2
+	{"POP", 1},  //  3
+	{"EQ", 3},   //  4
+	{"GT", 3},   //  5
+	{"JMP", 1},  //  6
+	{"JT", 2},   //  7
+	{"JF", 2},   //  8
+	{"ADD", 3},  //  9
+	{"MULT", 3}, //  a
+	{"MOD", 3},  //  b
+	{"AND", 3},  //  c
+	{"OR", 3},   //  d
+	{"NOT", 2},  //  e
+	{"RMEM", 2}, //  f
+	{"WMEM", 2}, // 10
+	{"CALL", 1}, // 11
+	{"RET", 0},  // 12
+	{"OUT", 1},  // 13
+	{"IN", 1},   // 14
+	{"NOOP", 0}, // 15
 }
 
 func (vm *machine) traceOp() {

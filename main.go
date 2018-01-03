@@ -13,6 +13,6 @@ func main() {
 	defer file.Close()
 	vm := newMachine()
 	vm.load(file)
-	vm.debug = false
+	vm.breakpoint = 0x154b // JF which checks r7
 	vm.run()
 }
