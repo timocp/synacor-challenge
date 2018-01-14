@@ -7,14 +7,6 @@ import (
 )
 
 func (vm *machine) run() {
-	if vm.debug || vm.breakpoint > 0 {
-		var err error
-		vm.trace, err = os.OpenFile("trace.txt", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
-		if err != nil {
-			panic(err)
-		}
-		defer vm.trace.Close()
-	}
 	for !vm.halted {
 		vm.exec()
 	}
@@ -22,18 +14,8 @@ func (vm *machine) run() {
 
 func (vm *machine) exec() {
 	buf := make([]byte, 1)
-	if vm.breakpoint > 0 && vm.pc == vm.breakpoint {
-		vm.debug = true
-		// hack register 7
-		vm.reg[7] = 6
-		// bypass the confirmation mechanism
-		// replace CALL 178b with:
-		// JMP 157a  (178b returns with r0 != 6)
-		vm.mem[0x1571] = 6
-		vm.mem[0x1572] = 0x0157a
-	}
-	if vm.debug {
-		vm.traceOp()
+	if f, ok := vm.callbacks[vm.pc]; ok {
+		f()
 	}
 	op := vm.read()
 	switch op {
@@ -180,31 +162,31 @@ var ops = []struct {
 	{"NOOP", 0}, // 15
 }
 
-func (vm *machine) traceOp() {
+func (vm *machine) traceOp(w io.Writer) {
 	op := vm.mem[vm.pc]
-	fmt.Fprintf(vm.trace, "%04x %-4s", vm.pc, ops[op].name)
+	fmt.Fprintf(w, "%04x %-4s", vm.pc, ops[op].name)
 	for i := uint16(0); i <= 3; i++ {
 		if i < ops[op].args {
 			m := vm.mem[vm.pc+i+1]
 			if m <= 32767 {
 				// memory address or literal
-				fmt.Fprintf(vm.trace, " %4x", m)
+				fmt.Fprintf(w, " %4x", m)
 			} else if m <= 32775 {
 				// register reference
-				fmt.Fprintf(vm.trace, "   r%d", m-32768)
+				fmt.Fprintf(w, "   r%d", m-32768)
 			} else {
 				panic(fmt.Errorf("invalid memory: %d at %d", m, vm.pc+i+1))
 			}
 		} else {
-			fmt.Fprintf(vm.trace, "     ")
+			fmt.Fprintf(w, "     ")
 		}
 	}
-	fmt.Fprintf(vm.trace, " r=[")
+	fmt.Fprintf(w, " r=[")
 	for i, r := range vm.reg {
 		if i > 0 {
-			fmt.Fprintf(vm.trace, " ")
+			fmt.Fprintf(w, " ")
 		}
-		fmt.Fprintf(vm.trace, "%4x", r)
+		fmt.Fprintf(w, "%4x", r)
 	}
-	fmt.Fprintf(vm.trace, "] s=%s\n", vm.stack)
+	fmt.Fprintf(w, "] s=%s\n", vm.stack)
 }

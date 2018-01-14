@@ -1,9 +1,6 @@
 package main
 
-import (
-	"fmt"
-	"os"
-)
+import "fmt"
 
 /*
 == architecture ==
@@ -24,15 +21,17 @@ type machine struct {
 	pc uint16
 
 	// flags
-	halted     bool
-	debug      bool
-	breakpoint uint16
-	trace      *os.File
+	halted bool
+	debug  bool
+
+	// funcs the vm should call when an address is reached
+	callbacks map[uint16]func()
 }
 
 func newMachine() *machine {
 	vm := new(machine)
 	vm.stack = newStack()
+	vm.callbacks = make(map[uint16]func())
 	return vm
 }
 
@@ -42,6 +41,10 @@ func (vm *machine) push(v uint16) {
 
 func (vm *machine) pop() (uint16, bool) {
 	return vm.stack.pop()
+}
+
+func (vm *machine) callback(addr uint16, f func()) {
+	vm.callbacks[addr] = f
 }
 
 func (vm *machine) dumpMem() {
